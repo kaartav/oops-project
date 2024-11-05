@@ -148,7 +148,7 @@ public class CanvasPanel extends JPanel {
         return null;
     }
 
-    // Check for room overlap
+
     private boolean checkOverlap(Room newRoom) {
         for (Room room : rooms) {
             if (room != newRoom && newRoom.getBounds().intersects(room.getBounds())) {
