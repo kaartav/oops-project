@@ -10,6 +10,7 @@ public class ControlPanel extends JPanel {
     public ControlPanel() {
         setLayout(new GridLayout(5, 1)); // Layout for buttons
 
+        
         // Save button
         JButton saveButton = new JButton("Save Rooms");
         saveButton.addActionListener((ActionEvent e) -> {
@@ -31,8 +32,8 @@ public class ControlPanel extends JPanel {
         });
 
         // Add save and load buttons to the panel
-        add(saveButton);
-        add(loadButton);
+        //add(saveButton);
+        //add(loadButton);
 
         // Add buttons to add different room types
         JButton addBedroomButton = new JButton("Add Bedroom");

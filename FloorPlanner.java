@@ -4,11 +4,17 @@ import java.awt.*;
 public class FloorPlanner extends JFrame {
     private ControlPanel controlPanel;
     private CanvasPanel canvasPanel;
+    private MenuBarPanel menuBarPanel; //not really a panel, called it a panel for organizational purposes
 
     public FloorPlanner() {
         // Initialize the control panel and canvas panel
         controlPanel = new ControlPanel();
         canvasPanel = new CanvasPanel();
+
+        menuBarPanel = new MenuBarPanel(canvasPanel);
+
+        setJMenuBar(menuBarPanel);
+
 
         // Set up the main window layout
         setLayout(new BorderLayout());
