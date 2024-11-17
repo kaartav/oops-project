@@ -10,7 +10,6 @@ public class ControlPanel extends JPanel {
     public ControlPanel() {
         setLayout(new GridLayout(5, 1)); // Layout for buttons
 
-        
         // Save button
         JButton saveButton = new JButton("Save Rooms");
         saveButton.addActionListener((ActionEvent e) -> {
@@ -32,8 +31,8 @@ public class ControlPanel extends JPanel {
         });
 
         // Add save and load buttons to the panel
-        //add(saveButton);
-        //add(loadButton);
+        // add(saveButton);
+        // add(loadButton);
 
         // Add buttons to add different room types
         JButton addBedroomButton = new JButton("Add Bedroom");
@@ -79,6 +78,44 @@ public class ControlPanel extends JPanel {
         add(addBathroomButton);
         add(addKitchenButton);
         add(addLivingRoomButton);
+
+        // Add new buttons for relative positioning
+        JButton addNorthButton = new JButton("Add Room (North)");
+        JButton addSouthButton = new JButton("Add Room (South)");
+        JButton addEastButton = new JButton("Add Room (East)");
+        JButton addWestButton = new JButton("Add Room (West)");
+
+        // Updated action listeners in ControlPanel
+        addNorthButton.addActionListener(e -> {
+            if (canvasPanel != null) {
+                canvasPanel.addRoomRelative("North");
+            }
+        });
+
+        addSouthButton.addActionListener(e -> {
+            if (canvasPanel != null) {
+                canvasPanel.addRoomRelative("South");
+            }
+        });
+
+        addEastButton.addActionListener(e -> {
+            if (canvasPanel != null) {
+                canvasPanel.addRoomRelative("East");
+            }
+        });
+
+        addWestButton.addActionListener(e -> {
+            if (canvasPanel != null) {
+                canvasPanel.addRoomRelative("West");
+            }
+        });
+
+        // Add the new buttons to the panel
+        add(addNorthButton);
+        add(addSouthButton);
+        add(addEastButton);
+        add(addWestButton);
+
     }
 
     // Set the canvas panel so the control panel can interact with it

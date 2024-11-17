@@ -18,6 +18,7 @@ public class CanvasPanel extends JPanel {
     // private ArrayList<Door> doors = new ArrayList<>();
     private Room selectedRoom = null; // Room being dragged
     private int offsetX, offsetY; // Offset for smooth dragging
+    public Room selectedRoomForRelativePos = null;
 
     public CanvasPanel() {
         setBackground(Color.LIGHT_GRAY);
@@ -27,6 +28,10 @@ public class CanvasPanel extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 // Check if a room is clicked
+                if (e.isShiftDown()) {
+                    // Shift+Click: Handle special case
+                    selectedRoomForRelativePos = getRoomAt(e.getX(), e.getY());
+                }
                 selectedRoom = getRoomAt(e.getX(), e.getY());
                 if (selectedRoom != null) {
                     // Store the offset between the mouse click and room's top-left corner
@@ -53,7 +58,6 @@ public class CanvasPanel extends JPanel {
         };
 
         addMouseListener(mouseAdapter);
-
         // Mouse motion listener to handle dragging
         addMouseMotionListener(new MouseMotionListener() {
             @Override
@@ -148,7 +152,6 @@ public class CanvasPanel extends JPanel {
         return null;
     }
 
-
     private boolean checkOverlap(Room newRoom) {
         for (Room room : rooms) {
             if (room != newRoom && newRoom.getBounds().intersects(room.getBounds())) {
@@ -194,5 +197,105 @@ public class CanvasPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Failed to load rooms: " + e.getMessage());
         }
     }
+
+    private String selectRoomType() {
+        String[] roomTypes = { "Bedroom", "Bathroom", "Kitchen", "Living Room" };
+        int selection = JOptionPane.showOptionDialog(
+                this,
+                "Select a room type:",
+                "Room Selection",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                roomTypes,
+                roomTypes[0]);
+
+        if (selection != -1) {
+            return roomTypes[selection];
+        } else {
+            return null; // User cancelled the selection
+        }
+    }
+
+    public void addRoomRelative(String direction) {
+        if (selectedRoomForRelativePos == null) {
+            JOptionPane.showMessageDialog(this, "Please select a room first.");
+            return;
+        }
+
+        // Prompt the user to select a room type
+        String roomType = selectRoomType();
+        if (roomType == null) {
+            return; // User canceled the selection
+        }
+
+        // Define the room properties based on the selected room type
+        Room newRoom = null;
+        switch (roomType) {
+            case "Bedroom":
+                newRoom = new Room(0, 0, 100, 100, Color.GREEN, "Bedroom");
+                break;
+            case "Bathroom":
+                newRoom = new Room(0, 0, 80, 80, Color.PINK, "Bathroom");
+                break;
+            case "Kitchen":
+                newRoom = new Room(0, 0, 120, 100, Color.RED, "Kitchen");
+                break;
+            case "Living Room":
+                newRoom = new Room(0, 0, 140, 100, Color.YELLOW, "Living Room");
+                break;
+        }
+
+        switch (direction) {
+            case "North":
+                newRoom.setX(selectedRoomForRelativePos.getX());
+                newRoom.setY(selectedRoomForRelativePos.getY() - selectedRoomForRelativePos.getHeight());
+                break;
+            case "South":
+                newRoom.setX(selectedRoomForRelativePos.getX());
+                newRoom.setY(selectedRoomForRelativePos.getY() + selectedRoomForRelativePos.getHeight());
+                break;
+            case "East":
+                newRoom.setX(selectedRoomForRelativePos.getX() + selectedRoomForRelativePos.getWidth());
+                newRoom.setY(selectedRoomForRelativePos.getY());
+                break;
+            case "West":
+                newRoom.setX(selectedRoomForRelativePos.getX() - newRoom.getWidth());
+                newRoom.setY(selectedRoomForRelativePos.getY());
+                break;
+        }
+
+        snapToGrid(newRoom);
+
+        if (!checkOverlap(newRoom)) {
+            rooms.add(newRoom);
+            repaint();
+        } else {
+            JOptionPane.showMessageDialog(this, "Cannot place room here. Overlap detected.");
+        }
+    }
+
+    // public void alignRoom(String alignment) {
+    // if (selectedRoomForRelativePos == null) {
+    // JOptionPane.showMessageDialog(this, "Please select a room first.");
+    // return;
+    // }
+
+    // switch (alignment) {
+    // case "Left":
+    // selectedRoomForRelativePos.setX(GRID_SIZE);
+    // break;
+    // case "Right":
+    // selectedRoomForRelativePos.setX(getWidth() - selectedRoom.getWidth() -
+    // GRID_SIZE);
+    // break;
+    // case "Center":
+    // selectedRoomForRelativePos.setX((getWidth() - selectedRoom.getWidth()) / 2);
+    // break;
+    // }
+
+    // snapToGrid(selectedRoomForRelativePos);
+    // repaint();
+    // }
 
 }
