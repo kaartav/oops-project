@@ -116,10 +116,64 @@ public class ControlPanel extends JPanel {
         add(addEastButton);
         add(addWestButton);
 
+        // Add furniture buttons
+        // Add action listeners for furniture buttons
+        JButton addBedButton = new JButton("Add Bed");
+        addBedButton.setPreferredSize(new Dimension(30, 30));
+        addBedButton.addActionListener(e -> canvasPanel.addBed());
+
+        add(addBedButton);
+
+        JButton addSofaButton = new JButton("Add Sofa");
+        addSofaButton.setPreferredSize(new Dimension(30, 30));
+        addSofaButton.addActionListener(e -> canvasPanel.addSofa());
+        add(addSofaButton);
+
+        JButton addTVButton = new JButton("Add TV");
+        addTVButton.setPreferredSize(new Dimension(30, 30));
+        addTVButton.addActionListener(e -> canvasPanel.addTV());
+
+        add(addTVButton);
+
+        JButton addTable = new JButton("Add Table");
+        addTable.setPreferredSize(new Dimension(30, 30));
+        addTable.addActionListener(e -> canvasPanel.addTable());
+        add(addTable);
+
+        JButton addChair = new JButton("Add Chair");
+        addChair.setPreferredSize(new Dimension(30, 30));
+        addChair.addActionListener(e -> canvasPanel.addChair());
+        add(addChair);
+
+        // Add Sink button
+        JButton addSink = new JButton("Add Sink");
+        addSink.addActionListener(e -> canvasPanel.addSink());
+        add(addSink);
+        JButton addCookingArea = new JButton("Add Cooking Area");
+        addCookingArea.addActionListener(e -> canvasPanel.addCookingArea());
+        add(addCookingArea);
+
+        JButton addShower = new JButton("Add Shower");
+        addShower.addActionListener(e -> canvasPanel.addShower());
+        add(addShower);
+
+        JButton addComode = new JButton("Add Comode");
+        addComode.addActionListener(e -> canvasPanel.addComode());
+        add(addComode);
+
+        JButton deleteButton = new JButton("Delete Selected");
+        deleteButton.addActionListener(e -> {
+            if (canvasPanel != null) {
+                canvasPanel.deleteSelected();
+            }
+        });
+        add(deleteButton);
+
     }
 
     // Set the canvas panel so the control panel can interact with it
     public void setCanvasPanel(CanvasPanel canvasPanel) {
         this.canvasPanel = canvasPanel;
     }
+
 }

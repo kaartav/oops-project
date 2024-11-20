@@ -20,6 +20,11 @@ public class CanvasPanel extends JPanel {
     private int offsetX, offsetY; // Offset for smooth dragging
     public Room selectedRoomForRelativePos = null;
 
+    private int furnitureOffsetX, furnitureOffsetY;
+    private ArrayList<Furniture> furnitureItems = new ArrayList<>();
+    private Furniture selectedFurniture = null;
+    private Furniture selectedFurnitureforUsing = null;
+
     public CanvasPanel() {
         setBackground(Color.LIGHT_GRAY);
 
@@ -31,9 +36,19 @@ public class CanvasPanel extends JPanel {
                 if (e.isShiftDown()) {
                     // Shift+Click: Handle special case
                     selectedRoomForRelativePos = getRoomAt(e.getX(), e.getY());
+                    selectedFurnitureforUsing = getFurnitureAt(e.getX(), e.getY());
+
+                }
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    rotateFurnitureAt(e.getX(), e.getY());
                 }
                 selectedRoom = getRoomAt(e.getX(), e.getY());
-                if (selectedRoom != null) {
+                selectedFurniture = getFurnitureAt(e.getX(), e.getY());
+
+                if (selectedFurniture != null) {
+                    furnitureOffsetX = e.getX() - selectedFurniture.getX();
+                    furnitureOffsetY = e.getY() - selectedFurniture.getY();
+                } else if (selectedRoom != null) {
                     // Store the offset between the mouse click and room's top-left corner
                     offsetX = e.getX() - selectedRoom.getX();
                     offsetY = e.getY() - selectedRoom.getY();
@@ -53,6 +68,16 @@ public class CanvasPanel extends JPanel {
                     }
                     selectedRoom = null; // Deselect the room
                     repaint(); // Repaint the canvas
+                } else if (selectedFurniture != null) {
+
+                    if (checkOverlapFurniture(selectedFurniture)) {
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "furniture overlap detected!");
+                        // If overlap, return the room to its original position
+                        selectedFurniture.setX(selectedFurniture.getOldX());
+                        selectedFurniture.setY(selectedFurniture.getOldY());
+                    }
+                    selectedFurniture = null; // Deselect the room
+                    repaint(); // Repaint the canvas
                 }
             }
         };
@@ -62,7 +87,11 @@ public class CanvasPanel extends JPanel {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedRoom != null) {
+                if (selectedFurniture != null) {
+                    selectedFurniture.setX(e.getX() - furnitureOffsetX);
+                    selectedFurniture.setY(e.getY() - furnitureOffsetY);
+                    repaint();
+                } else if (selectedRoom != null) {
                     // Update room position based on mouse movement
                     selectedRoom.setX(e.getX() - offsetX);
                     selectedRoom.setY(e.getY() - offsetY);
@@ -86,23 +115,11 @@ public class CanvasPanel extends JPanel {
         for (Room room : rooms) {
             room.draw(g); // Draw each room on the canvas
         }
-
-        // Draw windows
-        for (Window window : windows) {
-            window.draw(g);
+        for (Furniture furniture : furnitureItems) {
+            furniture.draw(g);
         }
 
     }
-
-    // // Helper method to check if a location is occupied by any room
-    // private boolean isOccupied(int x, int y) {
-    // for (Room room : rooms) {
-    // if (room.getX() == x && room.getY() == y) {
-    // return true;
-    // }
-    // }
-    // return false;
-    // }
 
     // Add a new room at a default location
     public void addRoom(Room newRoom) {
@@ -152,12 +169,33 @@ public class CanvasPanel extends JPanel {
         return null;
     }
 
+    private Furniture getFurnitureAt(int x, int y) {
+        for (Furniture Furniture : furnitureItems) {
+            if (Furniture.getBounds().contains(x, y)) {
+                Furniture.saveCurrentPosition(); // Save the original position in case of overlap
+                return Furniture;
+            }
+        }
+        return null;
+    }
+
     private boolean checkOverlap(Room newRoom) {
         for (Room room : rooms) {
             if (room != newRoom && newRoom.getBounds().intersects(room.getBounds())) {
                 return true; // Overlap detected
             }
         }
+
+        return false;
+    }
+
+    private boolean checkOverlapFurniture(Furniture newFurniture) {
+        for (Furniture furniture : furnitureItems) {
+            if (furniture != newFurniture && newFurniture.getBounds().intersects(furniture.getBounds())) {
+                return true; // Overlap detected
+            }
+        }
+
         return false;
     }
 
@@ -275,27 +313,89 @@ public class CanvasPanel extends JPanel {
         }
     }
 
-    // public void alignRoom(String alignment) {
-    // if (selectedRoomForRelativePos == null) {
-    // JOptionPane.showMessageDialog(this, "Please select a room first.");
-    // return;
-    // }
+    public void addFurniture(Furniture furniture) {
 
-    // switch (alignment) {
-    // case "Left":
-    // selectedRoomForRelativePos.setX(GRID_SIZE);
-    // break;
-    // case "Right":
-    // selectedRoomForRelativePos.setX(getWidth() - selectedRoom.getWidth() -
-    // GRID_SIZE);
-    // break;
-    // case "Center":
-    // selectedRoomForRelativePos.setX((getWidth() - selectedRoom.getWidth()) / 2);
-    // break;
-    // }
+        furnitureItems.add(furniture);
+        repaint();
 
-    // snapToGrid(selectedRoomForRelativePos);
-    // repaint();
-    // }
+    }
+
+    // Add furniture based on button click in ControlPanel
+    public void addBed() {
+        Furniture bed = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\bed.png", 15, 15); // Update the path as
+                                                                                             // necessary
+        addFurniture(bed);
+    }
+
+    public void addTable() {
+        Furniture bed = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\table.png", 15, 15); // Update the path as
+                                                                                               // necessary
+        addFurniture(bed);
+    }
+
+    public void addChair() {
+        Furniture bed = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\chair.png", 15, 15); // Update the path as
+                                                                                               // necessary
+        addFurniture(bed);
+    }
+
+    public void addSofa() {
+        Furniture sofa = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\sofa.png", 15, 15); // Update the path as
+                                                                                               // necessary
+        addFurniture(sofa);
+    }
+
+    public void addTV() {
+        Furniture tv = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\TV.png", 20, 20); // Update the path as
+                                                                                           // necessary
+        addFurniture(tv);
+    }
+
+    public void addSink() {
+        Furniture sink = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\sink.png", 10, 10); // Update the path as
+                                                                                               // necessary
+        addFurniture(sink);
+    }
+
+    public void addCookingArea() {
+        Furniture cookingArea = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\cookingArea.png", 20, 20); // Update
+                                                                                                             // the path
+                                                                                                             // as
+                                                                                                             // necessary
+        addFurniture(cookingArea);
+    }
+
+    public void addShower() {
+        Furniture shower = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\shower.png", 12, 12); // Update the path as
+                                                                                                   // necessary
+        addFurniture(shower);
+    }
+
+    public void addComode() {
+        Furniture comode = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\comode.png", 8, 8); // Update the path as
+                                                                                                 // necessary
+        addFurniture(comode);
+    }
+
+    public void deleteSelected() {
+        if (selectedRoomForRelativePos != null) {
+            rooms.remove(selectedRoomForRelativePos);
+            selectedRoomForRelativePos = null; // Clear selection
+            repaint();
+        } else if (selectedFurnitureforUsing != null) {
+            furnitureItems.remove(selectedFurnitureforUsing);
+            selectedFurnitureforUsing = null; // Clear selection
+            repaint();
+        } else {
+            JOptionPane.showMessageDialog(this, "No room or furniture selected!");
+        }
+    }
+
+    public void rotateFurnitureAt(int x, int y) {
+        selectedFurniture = getFurnitureAt(x, y);
+
+        selectedFurniture.rotate();
+        repaint();
+    }
 
 }
