@@ -49,6 +49,10 @@ public class Room implements Serializable {
         this.y = y;
     }
 
+    public String getType() {
+        return roomType;
+    }
+
     // Save the current position before dragging
     public void saveCurrentPosition() {
         oldX = x;

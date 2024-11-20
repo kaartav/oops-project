@@ -11,7 +11,7 @@ public class ControlPanel extends JPanel {
         setLayout(new GridLayout(5, 1)); // Layout for buttons
 
         // Save button
-        JButton saveButton = new JButton("Save Rooms");
+        JButton saveButton = new JButton("Save file");
         saveButton.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser();
             if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -21,7 +21,7 @@ public class ControlPanel extends JPanel {
         });
 
         // Load button
-        JButton loadButton = new JButton("Load Rooms");
+        JButton loadButton = new JButton("Load files");
         loadButton.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser();
             if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -168,6 +168,29 @@ public class ControlPanel extends JPanel {
             }
         });
         add(deleteButton);
+
+        JButton addDoorButton = new JButton("Add Door");
+        JButton addWindowButton = new JButton("Add Window");
+
+        addDoorButton.addActionListener((ActionEvent e) -> {
+            Room room1 = canvasPanel.SelectedRoomforRelativetedRoom(); // Room to add door
+            Room room2 = null; // Second room or null for outside
+
+            // Calculate position based on user input or default
+            int x = room1.getX() + room1.getWidth() - 10; // Example position
+            int y = room1.getY() + room1.getHeight() / 2 - 5;
+            canvasPanel.addDoor(room1, room2, x, y, 10, 20);
+        });
+
+        addWindowButton.addActionListener((ActionEvent e) -> {
+            Room room = canvasPanel.SelectedRoomforRelativetedRoom();
+            int x = room.getX() + 10;
+            int y = room.getY() - 10;
+            canvasPanel.addWindow(room, x, y, 40, 5);
+        });
+
+        add(addDoorButton);
+        add(addWindowButton);
 
     }
 
