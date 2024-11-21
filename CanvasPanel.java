@@ -101,8 +101,8 @@ public class CanvasPanel extends JPanel {
                     selectedFurniture = null; // Deselect the room
                     repaint();
                 } else if (selectedWindow != null) {
-                    if (checkOverlapWindowswithdoors(selectedWindow)) {
-                        JOptionPane.showMessageDialog(CanvasPanel.this, "Window overlap detected!");
+                    if (checkOverlapWindowswithdoors(selectedWindow) && isWindowBetweenRooms(selectedWindow) ) {
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "You cant place a window there");
                         selectedWindow.setX(selectedWindow.getOldX());
                         selectedWindow.setY(selectedWindow.getOldY());
                     }
@@ -110,7 +110,7 @@ public class CanvasPanel extends JPanel {
                     repaint();
                 } else if (selectedDoor != null) {
                     if (checkOverlapDoorswithwindows(selectedDoor)) {
-                        JOptionPane.showMessageDialog(CanvasPanel.this, "Door overlap detected!");
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "You cant place a door there");
                         selectedDoor.setX(selectedDoor.getOldX());
                         selectedDoor.setY(selectedDoor.getOldY());
                     }
@@ -549,5 +549,11 @@ public class CanvasPanel extends JPanel {
     public Room SelectedRoomforRelativetedRoom() {
         return selectedRoomForRelativePos;
     }
-
+    public boolean isWindowBetweenRooms(Window window){
+        System.out.println("your here in windows between rooms function");
+        if (!(getRoomAt(window.getX()+5, window.getY()-5)==null) && !(getRoomAt(window.getX()-5, window.getY()+5)==null)) {
+            return true;
+        }
+        return false;
+    }
 }
