@@ -14,7 +14,6 @@ import java.util.ArrayList;
 public class CanvasPanel extends JPanel {
     private static final int GRID_SIZE = 20; // Grid size for snapping
     private ArrayList<Room> rooms = new ArrayList<>();
-    private ArrayList<Window> windows = new ArrayList<>();
     // private ArrayList<Door> doors = new ArrayList<>();
     private Room selectedRoom = null; // Room being dragged
     private int offsetX, offsetY; // Offset for smooth dragging
@@ -24,6 +23,13 @@ public class CanvasPanel extends JPanel {
     private ArrayList<Furniture> furnitureItems = new ArrayList<>();
     private Furniture selectedFurniture = null;
     private Furniture selectedFurnitureforUsing = null;
+
+    private ArrayList<Doors> doors = new ArrayList<>();
+    private ArrayList<Window> windows = new ArrayList<>();
+    private Doors selectedDoor = null;
+    private Window selectedWindow = null;
+    private int doorOffsetX, doorOffsetY;
+    private int windowOffsetX, windowOffsetY;
 
     public CanvasPanel() {
         setBackground(Color.LIGHT_GRAY);
@@ -40,12 +46,28 @@ public class CanvasPanel extends JPanel {
 
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    rotateFurnitureAt(e.getX(), e.getY());
+
+                    if (!(getFurnitureAt(e.getX(), e.getY()) == null)) {
+                        rotateFurnitureAt(e.getX(), e.getY());
+                    } else if (!(getDoorAt(e.getX(), e.getY()) == null)) {
+                        rotateDoorAt(e.getX(), e.getY());
+                    } else if (!(getWindowAt(e.getX(), e.getY()) == null)) {
+                        rotateWindowsAt(e.getX(), e.getY());
+                    }
+
                 }
                 selectedRoom = getRoomAt(e.getX(), e.getY());
                 selectedFurniture = getFurnitureAt(e.getX(), e.getY());
+                selectedDoor = getDoorAt(e.getX(), e.getY());
+                selectedWindow = getWindowAt(e.getX(), e.getY());
 
-                if (selectedFurniture != null) {
+                if (selectedDoor != null) {
+                    doorOffsetX = e.getX() - selectedDoor.getX();
+                    doorOffsetY = e.getY() - selectedDoor.getY();
+                } else if (selectedWindow != null) {
+                    windowOffsetX = e.getX() - selectedWindow.getX();
+                    windowOffsetY = e.getY() - selectedWindow.getY();
+                } else if (selectedFurniture != null) {
                     furnitureOffsetX = e.getX() - selectedFurniture.getX();
                     furnitureOffsetY = e.getY() - selectedFurniture.getY();
                 } else if (selectedRoom != null) {
@@ -77,7 +99,23 @@ public class CanvasPanel extends JPanel {
                         selectedFurniture.setY(selectedFurniture.getOldY());
                     }
                     selectedFurniture = null; // Deselect the room
-                    repaint(); // Repaint the canvas
+                    repaint();
+                } else if (selectedWindow != null) {
+                    if (checkOverlapWindowswithdoors(selectedWindow)) {
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "Window overlap detected!");
+                        selectedWindow.setX(selectedWindow.getOldX());
+                        selectedWindow.setY(selectedWindow.getOldY());
+                    }
+                    selectedWindow = null; // Deselect the window
+                    repaint();
+                } else if (selectedDoor != null) {
+                    if (checkOverlapDoorswithwindows(selectedDoor)) {
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "Door overlap detected!");
+                        selectedDoor.setX(selectedDoor.getOldX());
+                        selectedDoor.setY(selectedDoor.getOldY());
+                    }
+                    selectedDoor = null; // Deselect the door
+                    repaint();
                 }
             }
         };
@@ -87,15 +125,22 @@ public class CanvasPanel extends JPanel {
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedFurniture != null) {
+                if (selectedDoor != null) {
+                    selectedDoor.setX(e.getX() - doorOffsetX);
+                    selectedDoor.setY(e.getY() - doorOffsetY);
+                    repaint();
+                } else if (selectedWindow != null) {
+                    selectedWindow.setX(e.getX() - windowOffsetX);
+                    selectedWindow.setY(e.getY() - windowOffsetY);
+                    repaint();
+                } else if (selectedFurniture != null) {
                     selectedFurniture.setX(e.getX() - furnitureOffsetX);
                     selectedFurniture.setY(e.getY() - furnitureOffsetY);
                     repaint();
                 } else if (selectedRoom != null) {
-                    // Update room position based on mouse movement
                     selectedRoom.setX(e.getX() - offsetX);
                     selectedRoom.setY(e.getY() - offsetY);
-                    repaint(); // Redraw the canvas with the room in the new location
+                    repaint();
                 }
             }
 
@@ -117,6 +162,12 @@ public class CanvasPanel extends JPanel {
         }
         for (Furniture furniture : furnitureItems) {
             furniture.draw(g);
+        }
+        for (Doors door : doors) {
+            door.draw(g);
+        }
+        for (Window window : windows) {
+            window.draw(g);
         }
 
     }
@@ -179,6 +230,31 @@ public class CanvasPanel extends JPanel {
         return null;
     }
 
+    // Get the window at a specific x, y position
+    private Window getWindowAt(int x, int y) {
+        for (Window window : windows) {
+            if (new Rectangle(window.getX(), window.getY(), window.getWidth(), window.getHeight())
+                    .contains(x, y)) {
+                // window.saveCurrentPosition(); // Save the original position in case of
+                // overlap
+                return window;
+            }
+        }
+        return null;
+    }
+
+    // Get the door at a specific x, y position
+    private Doors getDoorAt(int x, int y) {
+        for (Doors door : doors) {
+            if (new Rectangle(door.getX(), door.getY(), door.getWidth(), door.getHeight())
+                    .contains(x, y)) {
+                // door.saveCurrentPosition(); // Save the original position in case of overlap
+                return door;
+            }
+        }
+        return null;
+    }
+
     private boolean checkOverlap(Room newRoom) {
         for (Room room : rooms) {
             if (room != newRoom && newRoom.getBounds().intersects(room.getBounds())) {
@@ -199,6 +275,35 @@ public class CanvasPanel extends JPanel {
         return false;
     }
 
+    private boolean checkOverlapWindows(int x, int y, int width, int height) {
+        for (Window window : windows) {
+            if (new Rectangle(window.getX(), window.getY(), window.getWidth(),
+                    window.getHeight())
+                    .intersects(new Rectangle(x, y, width, height))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkOverlapWindowswithdoors(Window newWindow) {
+        for (Doors door : doors) {
+            if (newWindow.getBounds().intersects(door.getBounds())) {
+                return true; // Overlap detected
+            }
+        }
+        return false; // No overlap
+    }
+
+    private boolean checkOverlapDoorswithwindows(Doors door) {
+        for (Window window : windows) {
+            if (window.getBounds().intersects(door.getBounds())) {
+                return true; // Overlap detected
+            }
+        }
+        return false; // No overlap
+    }
+
     // Draw the grid
     private void drawGrid(Graphics g) {
         g.setColor(Color.GRAY);
@@ -217,10 +322,17 @@ public class CanvasPanel extends JPanel {
 
     public void saveRoomsToFile(File file) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
+            // Save rooms first
             out.writeObject(rooms);
-            JOptionPane.showMessageDialog(this, "Rooms saved successfully!");
+
+            // Save furniture items, doors, and windows separately
+            out.writeObject(furnitureItems);
+            out.writeObject(doors);
+            out.writeObject(windows);
+
+            JOptionPane.showMessageDialog(this, "File saved successfully!");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Failed to save rooms: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Failed to save file: " + e.getMessage());
         }
     }
 
@@ -229,10 +341,13 @@ public class CanvasPanel extends JPanel {
     public void loadRoomsFromFile(File file) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             rooms = (ArrayList<Room>) in.readObject();
+            furnitureItems = (ArrayList<Furniture>) in.readObject();
+            doors = (ArrayList<Doors>) in.readObject();
+            windows = (ArrayList<Window>) in.readObject();
             repaint(); // Redraw the canvas to show loaded rooms
             JOptionPane.showMessageDialog(this, "Rooms loaded successfully!");
         } catch (IOException | ClassNotFoundException e) {
-            JOptionPane.showMessageDialog(this, "Failed to load rooms: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Failed to load file: " + e.getMessage());
         }
     }
 
@@ -396,6 +511,43 @@ public class CanvasPanel extends JPanel {
 
         selectedFurniture.rotate();
         repaint();
+    }
+
+    public void rotateDoorAt(int x, int y) {
+        selectedDoor = getDoorAt(x, y);
+        selectedDoor.rotate();
+        repaint();
+    }
+
+    public void rotateWindowsAt(int x, int y) {
+        selectedWindow = getWindowAt(x, y);
+
+        selectedWindow.rotate();
+        repaint();
+    }
+
+    public void addDoor(Room room1, Room room2, int x, int y, int width, int height) {
+        if (room1 != null && room2 != null && room1.getType().equals("Bedroom") && room2 == null) {
+            JOptionPane.showMessageDialog(this, "Bedroom cannot have doors to the outside!");
+            return;
+        }
+        Doors door = new Doors(x, y, width, height, room1, room2);
+        doors.add(door);
+        repaint();
+    }
+
+    public void addWindow(Room room, int x, int y, int width, int height) {
+        if (checkOverlapWindows(x, y, width, height)) {
+            JOptionPane.showMessageDialog(this, "Windows cannot overlap!");
+            return;
+        }
+        Window window = new Window(x, y, width, height, room);
+        windows.add(window);
+        repaint();
+    }
+
+    public Room SelectedRoomforRelativetedRoom() {
+        return selectedRoomForRelativePos;
     }
 
 }
