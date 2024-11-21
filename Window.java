@@ -37,10 +37,6 @@ public class Window implements Serializable {
         int temp = this.width;
         this.width = this.height;
         this.height = temp;
-
-        // Adjust position to maintain the center
-        this.x = this.oldX + (this.oldX + this.oldY - (this.width - this.height)) / 2;
-        this.y = this.oldY + (this.width - this.height) / 2;
     }
 
     public int getWidth() {

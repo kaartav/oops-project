@@ -46,9 +46,15 @@ public class CanvasPanel extends JPanel {
 
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    rotateFurnitureAt(e.getX(), e.getY());
-                    rotateDoorAt(e.getX(), e.getY());
-                    rotateWindowsAt(e.getX(), e.getY());
+
+                    if (!(getFurnitureAt(e.getX(), e.getY()) == null)) {
+                        rotateFurnitureAt(e.getX(), e.getY());
+                    } else if (!(getDoorAt(e.getX(), e.getY()) == null)) {
+                        rotateDoorAt(e.getX(), e.getY());
+                    } else if (!(getWindowAt(e.getX(), e.getY()) == null)) {
+                        rotateWindowsAt(e.getX(), e.getY());
+                    }
+
                 }
                 selectedRoom = getRoomAt(e.getX(), e.getY());
                 selectedFurniture = getFurnitureAt(e.getX(), e.getY());
@@ -291,7 +297,7 @@ public class CanvasPanel extends JPanel {
 
     private boolean checkOverlapDoorswithwindows(Doors door) {
         for (Window window : windows) {
-            if (door.getBounds().intersects(window.getBounds())) {
+            if (window.getBounds().intersects(door.getBounds())) {
                 return true; // Overlap detected
             }
         }
@@ -509,7 +515,6 @@ public class CanvasPanel extends JPanel {
 
     public void rotateDoorAt(int x, int y) {
         selectedDoor = getDoorAt(x, y);
-        System.out.println("selected the door,have to rotate it");
         selectedDoor.rotate();
         repaint();
     }
