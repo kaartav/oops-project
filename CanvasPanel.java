@@ -27,7 +27,9 @@ public class CanvasPanel extends JPanel {
     private ArrayList<Doors> doors = new ArrayList<>();
     private ArrayList<Window> windows = new ArrayList<>();
     private Doors selectedDoor = null;
+    private Doors selectedDoorforUsing = null;
     private Window selectedWindow = null;
+    private Window selectedWindowforUsing = null;
     private int doorOffsetX, doorOffsetY;
     private int windowOffsetX, windowOffsetY;
 
@@ -43,7 +45,8 @@ public class CanvasPanel extends JPanel {
                     // Shift+Click: Handle special case
                     selectedRoomForRelativePos = getRoomAt(e.getX(), e.getY());
                     selectedFurnitureforUsing = getFurnitureAt(e.getX(), e.getY());
-
+                    selectedWindowforUsing = getWindowAt(e.getX(), e.getY());
+                    selectedDoorforUsing = getDoorAt(e.getX(), e.getY());
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
 
@@ -53,6 +56,9 @@ public class CanvasPanel extends JPanel {
                         rotateDoorAt(e.getX(), e.getY());
                     } else if (!(getWindowAt(e.getX(), e.getY()) == null)) {
                         rotateWindowsAt(e.getX(), e.getY());
+                    } else if (!(getRoomAt(e.getX(), e.getY()) == null)) {
+                        selectedRoom = getRoomAt(e.getX(), e.getY());
+                        adjustRoomDimensions(selectedRoom);
                     }
 
                 }
@@ -61,10 +67,7 @@ public class CanvasPanel extends JPanel {
                 selectedDoor = getDoorAt(e.getX(), e.getY());
                 selectedWindow = getWindowAt(e.getX(), e.getY());
 
-                if (selectedDoor != null) {
-                    doorOffsetX = e.getX() - selectedDoor.getX();
-                    doorOffsetY = e.getY() - selectedDoor.getY();
-                } else if (selectedWindow != null) {
+                if (selectedWindow != null) {
                     windowOffsetX = e.getX() - selectedWindow.getX();
                     windowOffsetY = e.getY() - selectedWindow.getY();
                 } else if (selectedFurniture != null) {
@@ -74,11 +77,15 @@ public class CanvasPanel extends JPanel {
                     // Store the offset between the mouse click and room's top-left corner
                     offsetX = e.getX() - selectedRoom.getX();
                     offsetY = e.getY() - selectedRoom.getY();
+                } else if (selectedDoor != null) {
+                    doorOffsetX = e.getX() - selectedDoor.getX();
+                    doorOffsetY = e.getY() - selectedDoor.getY();
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+
                 // When mouse is released, check if the new position overlaps
                 if (selectedRoom != null) {
                     snapToGrid(selectedRoom); // Snap room to the grid
@@ -93,7 +100,7 @@ public class CanvasPanel extends JPanel {
                 } else if (selectedFurniture != null) {
 
                     if (checkOverlapFurniture(selectedFurniture)) {
-                        JOptionPane.showMessageDialog(CanvasPanel.this, "furniture overlap detected!");
+                        JOptionPane.showMessageDialog(CanvasPanel.this, "Furniture overlap detected!");
                         // If overlap, return the room to its original position
                         selectedFurniture.setX(selectedFurniture.getOldX());
                         selectedFurniture.setY(selectedFurniture.getOldY());
@@ -101,7 +108,7 @@ public class CanvasPanel extends JPanel {
                     selectedFurniture = null; // Deselect the room
                     repaint();
                 } else if (selectedWindow != null) {
-                    if (checkOverlapWindowswithdoors(selectedWindow) && isWindowBetweenRooms(selectedWindow)) {
+                    if (isWindowBetweenRooms(selectedWindow) || checkOverlapWindowswithdoors(selectedWindow)) {
                         JOptionPane.showMessageDialog(CanvasPanel.this, "You cant place a window there");
                         selectedWindow.setX(selectedWindow.getOldX());
                         selectedWindow.setY(selectedWindow.getOldY());
@@ -109,7 +116,8 @@ public class CanvasPanel extends JPanel {
                     selectedWindow = null; // Deselect the window
                     repaint();
                 } else if (selectedDoor != null) {
-                    if (checkOverlapDoorswithwindows(selectedDoor)) {
+                    if (checkOverlapDoorswithwindows(selectedDoor)
+                            || conditionsOnDoors(selectedDoor, e.getX(), e.getY())) {
                         JOptionPane.showMessageDialog(CanvasPanel.this, "You cant place a door there");
                         selectedDoor.setX(selectedDoor.getOldX());
                         selectedDoor.setY(selectedDoor.getOldY());
@@ -502,6 +510,14 @@ public class CanvasPanel extends JPanel {
             furnitureItems.remove(selectedFurnitureforUsing);
             selectedFurnitureforUsing = null; // Clear selection
             repaint();
+        } else if (selectedDoorforUsing != null) {
+            doors.remove(selectedDoorforUsing);
+            selectedDoorforUsing = null; // Clear selection
+            repaint();
+        } else if (selectedWindowforUsing != null) {
+            windows.remove(selectedWindowforUsing);
+            selectedWindowforUsing = null; // Clear selection
+            repaint();
         } else {
             JOptionPane.showMessageDialog(this, "No room or furniture selected!");
         }
@@ -554,11 +570,66 @@ public class CanvasPanel extends JPanel {
     }
 
     public boolean isWindowBetweenRooms(Window window) {
-        System.out.println("your here in windows between rooms function");
-        if (!(getRoomAt(window.getX() + 5, window.getY() - 5) == null)
-                && !(getRoomAt(window.getX() - 5, window.getY() + 5) == null)) {
-            return true;
+        for (Room room : rooms) {
+            if (window.getBounds().intersects(room.getBounds())) {
+                return true;
+            }
         }
+
         return false;
     }
+
+    public boolean conditionsOnDoors(Doors door, int x, int y) {
+        Room roomforthisfunction = getRoomAt(x, y);
+        if (roomforthisfunction.roomType == "Bedroom" || roomforthisfunction.roomType == "Bathroom") {
+            // if (getRoomAt(x + 50, y - 50) == null
+            // || getRoomAt(x - 50, y + 50) == null) {
+            // return true;
+            // }
+            // if (door.getBounds().intersects(roomforthisfunction.getBounds())) {
+            return true;
+
+        }
+        return false;
+
+    }
+
+    private void adjustRoomDimensions(Room room) {
+        // Create input fields for width and height
+        JTextField widthField = new JTextField(String.valueOf(room.getWidth()));
+        JTextField heightField = new JTextField(String.valueOf(room.getHeight()));
+
+        // Add input fields to a panel
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        panel.add(new JLabel("Width:"));
+        panel.add(widthField);
+        panel.add(new JLabel("Height:"));
+        panel.add(heightField);
+
+        // Show input dialog
+        int result = JOptionPane.showConfirmDialog(this, panel, "Adjust Room Dimensions",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            try {
+                // Parse new dimensions
+                int newWidth = Integer.parseInt(widthField.getText());
+                int newHeight = Integer.parseInt(heightField.getText());
+
+                // Validate dimensions
+                if (newWidth > 0 && newHeight > 0) {
+                    room.setWidth(newWidth);
+                    room.setHeight(newHeight);
+                    repaint(); // Update the canvas
+                } else {
+                    JOptionPane.showMessageDialog(this, "Dimensions must be positive numbers!",
+                            "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid numbers!",
+                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
 }

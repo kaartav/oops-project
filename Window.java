@@ -6,7 +6,7 @@ public class Window implements Serializable {
     private static final long serialVersionUID = 1L;
     private int width, height;
     public int oldX, oldY;
-    private Room room; // Associated room
+    private Room room;
 
     public Window(int x, int y, int width, int height, Room room) {
         this.x = x;

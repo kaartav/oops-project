@@ -5,7 +5,7 @@ public class Room implements Serializable {
     private static final long serialVersionUID = 1L; // For version control in serialization
     private int x, y, width, height;
     private Color color;
-    private String roomType;
+    public String roomType;
 
     private int oldX, oldY; // Old position for reverting in case of overlap
 
@@ -75,4 +75,13 @@ public class Room implements Serializable {
     public int getWidth() {
         return this.width;
     }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
 }
