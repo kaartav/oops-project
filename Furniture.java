@@ -1,10 +1,10 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.awt.geom.AffineTransform;
@@ -82,7 +82,7 @@ public class Furniture implements Serializable {
     private void loadImage(String imagePath) {
         try {
             BufferedImage img = ImageIO.read(new File(imagePath));
-
+            this.image = img;
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error loading image: " + imagePath);

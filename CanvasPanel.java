@@ -101,7 +101,7 @@ public class CanvasPanel extends JPanel {
                     selectedFurniture = null; // Deselect the room
                     repaint();
                 } else if (selectedWindow != null) {
-                    if (checkOverlapWindowswithdoors(selectedWindow) && isWindowBetweenRooms(selectedWindow) ) {
+                    if (checkOverlapWindowswithdoors(selectedWindow) && isWindowBetweenRooms(selectedWindow)) {
                         JOptionPane.showMessageDialog(CanvasPanel.this, "You cant place a window there");
                         selectedWindow.setX(selectedWindow.getOldX());
                         selectedWindow.setY(selectedWindow.getOldY());
@@ -481,8 +481,9 @@ public class CanvasPanel extends JPanel {
     }
 
     public void addShower() {
-        Furniture shower = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\shower.png", 12, 12); // Update the path as
-                                                                                                   // necessary
+        Furniture shower = new Furniture("C:\\Users\\kaartav\\Desktop\\oops\\shower.png", 12, 12); // Update the
+                                                                                                   // path as
+        // necessary
         addFurniture(shower);
     }
 
@@ -527,10 +528,12 @@ public class CanvasPanel extends JPanel {
     }
 
     public void addDoor(Room room1, Room room2, int x, int y, int width, int height) {
-        if (room1 != null && room2 != null && room1.getType().equals("Bedroom") && room2 == null) {
-            JOptionPane.showMessageDialog(this, "Bedroom cannot have doors to the outside!");
-            return;
-        }
+        // if (room1 != null && room2 != null && room1.getType().equals("Bedroom") &&
+        // room2 == null) {
+        // JOptionPane.showMessageDialog(this, "Bedroom cannot have doors to the
+        // outside!");
+        // return;
+        // }
         Doors door = new Doors(x, y, width, height, room1, room2);
         doors.add(door);
         repaint();
@@ -549,9 +552,11 @@ public class CanvasPanel extends JPanel {
     public Room SelectedRoomforRelativetedRoom() {
         return selectedRoomForRelativePos;
     }
-    public boolean isWindowBetweenRooms(Window window){
+
+    public boolean isWindowBetweenRooms(Window window) {
         System.out.println("your here in windows between rooms function");
-        if (!(getRoomAt(window.getX()+5, window.getY()-5)==null) && !(getRoomAt(window.getX()-5, window.getY()+5)==null)) {
+        if (!(getRoomAt(window.getX() + 5, window.getY() - 5) == null)
+                && !(getRoomAt(window.getX() - 5, window.getY() + 5) == null)) {
             return true;
         }
         return false;
