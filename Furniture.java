@@ -13,13 +13,19 @@ import javax.swing.*;
 
 public class Furniture implements Serializable {
     private int x, y, width, height, rotation;;
-    private BufferedImage image;
+    public BufferedImage image;
+    public String imagePath;
     private int oldX, oldY;
 
     public Furniture(String imagePath, int x, int y) {
         this.x = x;
         this.y = y;
         loadImage(imagePath);
+        this.imagePath = imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public void draw(Graphics g) {

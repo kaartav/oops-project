@@ -40,6 +40,13 @@ public class ControlPanel extends JPanel {
         JButton addKitchenButton = new JButton("Add Kitchen");
         JButton addLivingRoomButton = new JButton("Add Living Room");
 
+        customizeButton(addBedroomButton);
+        customizeButton(addBathroomButton);
+
+        customizeButton(addKitchenButton);
+
+        customizeButton(addLivingRoomButton);
+
         // Add action listeners for each button
         addBedroomButton.addActionListener(new ActionListener() {
             @Override
@@ -85,6 +92,11 @@ public class ControlPanel extends JPanel {
         JButton addEastButton = new JButton("Add Room (East)");
         JButton addWestButton = new JButton("Add Room (West)");
 
+        customizeButton(addNorthButton);
+        customizeButton(addSouthButton);
+        customizeButton(addWestButton);
+        customizeButton(addEastButton);
+
         // Updated action listeners in ControlPanel
         addNorthButton.addActionListener(e -> {
             if (canvasPanel != null) {
@@ -121,47 +133,57 @@ public class ControlPanel extends JPanel {
         JButton addBedButton = new JButton("Add Bed");
         addBedButton.setPreferredSize(new Dimension(30, 30));
         addBedButton.addActionListener(e -> canvasPanel.addBed());
+        customizeButton(addBedButton);
 
         add(addBedButton);
 
         JButton addSofaButton = new JButton("Add Sofa");
         addSofaButton.setPreferredSize(new Dimension(30, 30));
         addSofaButton.addActionListener(e -> canvasPanel.addSofa());
+        customizeButton(addSofaButton);
         add(addSofaButton);
 
         JButton addTVButton = new JButton("Add TV");
         addTVButton.setPreferredSize(new Dimension(30, 30));
         addTVButton.addActionListener(e -> canvasPanel.addTV());
+        customizeButton(addTVButton);
 
         add(addTVButton);
 
         JButton addTable = new JButton("Add Table");
         addTable.setPreferredSize(new Dimension(30, 30));
         addTable.addActionListener(e -> canvasPanel.addTable());
+        customizeButton(addTable);
         add(addTable);
 
         JButton addChair = new JButton("Add Chair");
         addChair.setPreferredSize(new Dimension(30, 30));
         addChair.addActionListener(e -> canvasPanel.addChair());
+        customizeButton(addChair);
         add(addChair);
 
         // Add Sink button
         JButton addSink = new JButton("Add Sink");
         addSink.addActionListener(e -> canvasPanel.addSink());
+        customizeButton(addSink);
         add(addSink);
         JButton addCookingArea = new JButton("Add Cooking Area");
         addCookingArea.addActionListener(e -> canvasPanel.addCookingArea());
+        customizeButton(addCookingArea);
         add(addCookingArea);
 
         JButton addShower = new JButton("Add Shower");
         addShower.addActionListener(e -> canvasPanel.addShower());
+        customizeButton(addShower);
         add(addShower);
 
         JButton addComode = new JButton("Add Comode");
         addComode.addActionListener(e -> canvasPanel.addComode());
+        customizeButton(addComode);
         add(addComode);
 
         JButton deleteButton = new JButton("Delete Selected");
+        customizeButton(deleteButton);
         deleteButton.addActionListener(e -> {
             if (canvasPanel != null) {
                 canvasPanel.deleteSelected();
@@ -171,6 +193,9 @@ public class ControlPanel extends JPanel {
 
         JButton addDoorButton = new JButton("Add Door");
         JButton addWindowButton = new JButton("Add Window");
+
+        customizeButton(addWindowButton);
+        customizeButton(addDoorButton);
 
         addDoorButton.addActionListener((ActionEvent e) -> {
             Room room1 = canvasPanel.SelectedRoomforRelativetedRoom(); // Room to add door
@@ -192,6 +217,38 @@ public class ControlPanel extends JPanel {
         add(addDoorButton);
         add(addWindowButton);
 
+    }
+
+    private void customizeButton(JButton button) {
+        // Set default background color to a dark shade
+        button.setBackground(new Color(40, 40, 40)); // Dark gray background
+        button.setOpaque(true);
+        button.setForeground(Color.WHITE); // Set text color to white
+
+        // Remove default button border and focus border for cleaner look
+        button.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        button.setFocusPainted(false); // Prevent focus outline from appearing when clicked
+
+        // Set font for the button (you can adjust the size if needed)
+        button.setFont(new Font("Helvetica Neue", Font.PLAIN, 12));
+
+        // Set the size of the button (optional, depending on your layout)
+        button.setPreferredSize(new Dimension(100, 30));
+
+        // Add mouse listener to implement hover effect
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                // Change the background color on hover to make the button darker
+                button.setBackground(new Color(30, 30, 30)); // Slightly darker gray
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                // Revert to the original background color when hover ends
+                button.setBackground(new Color(40, 40, 40)); // Original dark gray color
+            }
+        });
     }
 
     // Set the canvas panel so the control panel can interact with it

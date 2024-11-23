@@ -1,8 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,10 +45,11 @@ public class CanvasPanel extends JPanel {
                 // Check if a room is clicked
                 if (e.isShiftDown()) {
                     // Shift+Click: Handle special case
-                    selectedRoomForRelativePos = getRoomAt(e.getX(), e.getY());
                     selectedFurnitureforUsing = getFurnitureAt(e.getX(), e.getY());
                     selectedWindowforUsing = getWindowAt(e.getX(), e.getY());
                     selectedDoorforUsing = getDoorAt(e.getX(), e.getY());
+                    selectedRoomForRelativePos = getRoomAt(e.getX(), e.getY());
+
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
 
@@ -333,7 +336,12 @@ public class CanvasPanel extends JPanel {
             // Save rooms first
             out.writeObject(rooms);
 
-            // Save furniture items, doors, and windows separately
+            // Save furniture items (with image paths), doors, and windows
+            // Save each furniture item's image to a file and update its path
+            for (Furniture furniture : furnitureItems) {
+                saveFurnitureImage(furniture);
+            }
+
             out.writeObject(furnitureItems);
             out.writeObject(doors);
             out.writeObject(windows);
@@ -342,6 +350,48 @@ public class CanvasPanel extends JPanel {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Failed to save file: " + e.getMessage());
         }
+    }
+
+    // Helper method to save the image for each furniture item
+    private void saveFurnitureImage(Furniture furniture) {
+        try {
+            BufferedImage image = getFurnitureImage(furniture); // Your method to get the image for the furniture
+            if (image == null) {
+                throw new IOException("Furniture image is null");
+            }
+
+            // Ensure the images directory exists
+            File imagesDir = new File("images");
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs(); // Create the directory if it doesn't exist
+            }
+
+            String imagePath = "images/" + furniture.hashCode() + ".png"; // Unique image path based on hash
+            File imageFile = new File(imagePath);
+
+            // Write the image to disk
+            ImageIO.write(image, "PNG", imageFile);
+
+            // Set the image path in the furniture object
+            furniture.setImagePath(imagePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to save image: " + e.getMessage());
+        }
+    }
+
+    private BufferedImage getFurnitureImage(Furniture furniture) {
+        // This should return a valid BufferedImage object based on your application's
+        // logic
+        BufferedImage image = null;
+        // Your code here to load or generate the furniture image
+        // Example: image = ...
+
+        if (image == null) {
+            System.err.println("Error: Image for furniture " + furniture + " is null.");
+        }
+
+        return image;
     }
 
     // Method to load rooms from a file
@@ -502,11 +552,7 @@ public class CanvasPanel extends JPanel {
     }
 
     public void deleteSelected() {
-        if (selectedRoomForRelativePos != null) {
-            rooms.remove(selectedRoomForRelativePos);
-            selectedRoomForRelativePos = null; // Clear selection
-            repaint();
-        } else if (selectedFurnitureforUsing != null) {
+        if (selectedFurnitureforUsing != null) {
             furnitureItems.remove(selectedFurnitureforUsing);
             selectedFurnitureforUsing = null; // Clear selection
             repaint();
@@ -517,6 +563,10 @@ public class CanvasPanel extends JPanel {
         } else if (selectedWindowforUsing != null) {
             windows.remove(selectedWindowforUsing);
             selectedWindowforUsing = null; // Clear selection
+            repaint();
+        } else if (selectedRoomForRelativePos != null) {
+            rooms.remove(selectedRoomForRelativePos);
+            selectedRoomForRelativePos = null; // Clear selection
             repaint();
         } else {
             JOptionPane.showMessageDialog(this, "No room or furniture selected!");

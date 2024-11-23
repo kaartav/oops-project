@@ -19,9 +19,8 @@ public class MenuBarPanel extends JMenuBar implements ActionListener {
 
         this.canvasPanel = canvasPanel;
 
-
         JMenu fileMenu = new JMenu("File");
-        JMenu editMenu = new JMenu("Edit");
+        // JMenu editMenu = new JMenu("Edit");
         JMenu helpMenu = new JMenu("Help");
 
         loadItem = new JMenuItem("Load");
@@ -32,13 +31,12 @@ public class MenuBarPanel extends JMenuBar implements ActionListener {
         saveItem.addActionListener(this);
         exitItem.addActionListener(this);
 
-
         fileMenu.add(loadItem);
         fileMenu.add(saveItem);
         fileMenu.add(exitItem);
 
         this.add(fileMenu);
-        this.add(editMenu);
+        // this.add(editMenu);
         this.add(helpMenu);
     }
 
@@ -46,18 +44,18 @@ public class MenuBarPanel extends JMenuBar implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == loadItem) {
             JFileChooser fileChooser = new JFileChooser();
-        
-        // Show the Open dialog; return if the user approves file selection
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            
-            // Assume canvasPanel has a method `loadRoomsFromFile`
-            canvasPanel.loadRoomsFromFile(file);
-            
-            System.out.println("Loaded file: " + file.getAbsolutePath());
-        } else {
-            System.out.println("File selection was canceled.");
-        }
+
+            // Show the Open dialog; return if the user approves file selection
+            if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+
+                // Assume canvasPanel has a method `loadRoomsFromFile`
+                canvasPanel.loadRoomsFromFile(file);
+
+                System.out.println("Loaded file: " + file.getAbsolutePath());
+            } else {
+                System.out.println("File selection was canceled.");
+            }
         } else if (e.getSource() == saveItem) {
             JFileChooser fileChooser = new JFileChooser();
             if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -69,5 +67,5 @@ public class MenuBarPanel extends JMenuBar implements ActionListener {
             System.exit(0); // Exit the application
         }
     }
-    
+
 }
